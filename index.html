@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Juice AR Demo</title>
+  <title>Juice AR Demo (Animated)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <!-- A-Frame Extras (for animation-mixer, etc.) -->
+  <!-- A-Frame Extras (animation-mixer etc.) -->
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 </head>
 <body>
-  <h2 style="text-align:center;">🍹 Juice AR Demo (Enhanced)</h2>
+  <h2 style="text-align:center;">🍹 Juice AR Demo (Animated)</h2>
 
   <a-scene mindar-image="imageTargetSrc: juice.mind;"
            color-space="sRGB"
@@ -22,65 +22,73 @@
            id="scene">
 
     <a-assets>
-      <!-- Your GLB model -->
       <a-asset-item id="juiceModel" src="juice.glb"></a-asset-item>
     </a-assets>
 
-    <!-- Camera -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <!-- Lights -->
-    <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
-    <a-light type="directional" color="#ffffff" intensity="0.8" position="1 1 1"></a-light>
-    <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 -1 0"></a-light>
+    <a-light type="ambient" color="#fff" intensity="1"></a-light>
+    <a-light type="directional" color="#fff" intensity="0.8" position="2 2 2"></a-light>
+    <a-light type="directional" color="#fff" intensity="0.6" position="-2 -2 1"></a-light>
 
-    <!-- GLB Model with animation + spin -->
-    <a-gltf-model 
-        id="juiceObject"
-        src="#juiceModel"
-        scale="0.5 0.5 0.5"
-        position="0 0 0"
-        rotation="0 0 0"
-        mindar-image-target="targetIndex: 0"
-        visible="false"
-        animation-mixer
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
-    </a-gltf-model>
+    <!-- Model with animations -->
+    <a-entity id="juiceContainer" mindar-image-target="targetIndex: 0" visible="false">
+      <a-gltf-model 
+          id="juiceObject"
+          src="#juiceModel"
+          scale="0 0 0"
+          position="0 0 0"
+          rotation="0 0 0"
+          animation-mixer>
+      </a-gltf-model>
+
+      <!-- Spin animation -->
+      <a-animation attribute="rotation"
+                   dur="8000"
+                   to="0 360 0"
+                   repeat="indefinite"
+                   easing="linear">
+      </a-animation>
+
+      <!-- Floating animation -->
+      <a-animation attribute="position"
+                   dir="alternate"
+                   dur="2000"
+                   to="0 0.1 0"
+                   repeat="indefinite"
+                   easing="easeInOutSine">
+      </a-animation>
+    </a-entity>
 
   </a-scene>
 
   <script>
     const scene = document.querySelector("#scene");
+    const container = document.querySelector("#juiceContainer");
     const model = document.querySelector("#juiceObject");
-    let spinning = true;
 
     scene.addEventListener("loaded", () => {
       const mindar = scene.components["mindar-image"];
 
-      // Show model when target found
+      // Show + scale up when target found
       mindar.el.addEventListener("targetFound", () => {
-        model.setAttribute("visible", "true");
-        console.log("Marker found: showing model");
+        container.setAttribute("visible", "true");
+        model.setAttribute("animation__scalein", {
+          property: "scale",
+          to: "0.5 0.5 0.5",
+          dur: 800,
+          easing: "easeOutElastic"
+        });
+        console.log("✅ Marker found: animating in model");
       });
 
-      // Hide model when target lost
+      // Hide when target lost
       mindar.el.addEventListener("targetLost", () => {
-        model.setAttribute("visible", "false");
-        console.log("Marker lost: hiding model");
+        container.setAttribute("visible", "false");
+        model.setAttribute("scale", "0 0 0");
+        console.log("❌ Marker lost: hiding model");
       });
-    });
-
-    // Toggle spin on click
-    document.body.addEventListener("click", () => {
-      if (spinning) {
-        model.removeAttribute("animation");
-        spinning = false;
-        console.log("Stopped spinning");
-      } else {
-        model.setAttribute("animation", "property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear");
-        spinning = true;
-        console.log("Started spinning");
-      }
     });
   </script>
 </body>
