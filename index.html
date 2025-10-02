@@ -3,40 +3,39 @@
 <head>
   <title>Juice AR Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <!-- Latest A-Frame -->
+
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <!-- MindAR 1.2.5 -->
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 <body>
   <h2 style="text-align:center;">Juice AR Demo (GLB)</h2>
 
-  <a-scene mindar-image="imageTargetSrc: juice.mind;" 
-           color-space="sRGB" 
-           renderer="colorManagement: true, physicallyCorrectLights" 
-           vr-mode-ui="enabled: false" 
+  <a-scene mindar-image="imageTargetSrc: juice.mind;"
+           color-space="sRGB"
+           renderer="colorManagement: true, physicallyCorrectLights"
+           vr-mode-ui="enabled: false"
            device-orientation-permission-ui="enabled: false"
            id="scene">
 
     <a-assets>
-      <!-- Load your GLB model -->
+      <!-- Make sure juice.glb is in the same folder as index.html -->
       <a-asset-item id="juiceModel" src="juice.glb"></a-asset-item>
     </a-assets>
 
     <!-- Camera -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- AR GLB overlay on target -->
+    <!-- GLB Model -->
     <a-gltf-model 
-        src="#juiceModel" 
-        scale="0.5 0.5 0.5" 
-        position="0 0 0" 
-        rotation="0 0 0" 
+        src="#juiceModel"
+        scale="0.5 0.5 0.5"
+        position="0 0 0"
+        rotation="0 0 0"
         mindar-image-target="targetIndex: 0">
     </a-gltf-model>
 
   </a-scene>
-
 </body>
 </html>
