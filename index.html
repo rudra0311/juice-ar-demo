@@ -4,7 +4,24 @@
   <title>Juice AR Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Latest A-Frame -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script>
+  const video = document.querySelector("#juiceVideo");
+
+  const scene = document.querySelector("a-scene");
+  scene.addEventListener("loaded", () => {
+    document.body.addEventListener("click", async () => {
+      if (video.paused) {
+        try {
+          await video.play();
+          console.log("Juice video started!");
+        } catch(err) {
+          console.error("Video play failed:", err);
+        }
+      }
+    }, { once: true });
+  });
+</script>
+
   <!-- MindAR 1.2.5 -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
@@ -33,4 +50,5 @@
 
 </body>
 </html>
+
 
