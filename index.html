@@ -1,55 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Juice AR Demo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+  <title>Juice AR Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Latest A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- MindAR 1.2.5 -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+  <h2 style="text-align:center;">Juice AR Demo</h2>
 
-    <!-- A-Frame + MindAR -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/mindar-image-aframe.prod.js"></script>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
-             embedded
-             color-space="sRGB"
-             renderer="colorManagement: true, physicallyCorrectLights"
-             vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
+  <a-scene mindar-image="imageTargetSrc: juice.mind;" 
+           color-space="sRGB" 
+           renderer="colorManagement: true, physicallyCorrectLights" 
+           vr-mode-ui="enabled: false" 
+           device-orientation-permission-ui="enabled: false">
 
-      <a-assets>
-        <!-- Important: add "crossorigin" for GitHub Pages hosting -->
-        <video id="juiceVideo"
-               src="./juice.mp4"
-               preload="auto"
-               loop
-               muted
-               playsinline
-               crossorigin="anonymous">
-        </video>
-      </a-assets>
+    <a-assets>
+      <!-- Replace this with your Juice video -->
+      <video id="juiceVideo" src="juice.mp4" autoplay loop crossorigin="anonymous" webkit-playsinline playsinline></video>
+    </a-assets>
 
-      <!-- Camera -->
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <!-- Camera -->
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- AR Target + Video -->
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane src="#juiceVideo"
-                 position="0 0 0"
-                 height="1"
-                 width="1.5">
-        </a-plane>
-      </a-entity>
+    <!-- AR Video overlay on target -->
+    <a-video src="#juiceVideo" width="1" height="0.6" position="0 0 0" rotation="0 0 0" mindar-image-target="targetIndex: 0">
+    </a-video>
 
-    </a-scene>
+  </a-scene>
 
-    <script>
-      // Fix autoplay policy: manually start video after user interaction
-      window.addEventListener("click", () => {
-        const video = document.querySelector("#juiceVideo");
-        if (video.paused) {
-          video.play();
-        }
-      });
-    </script>
-  </body>
+</body>
 </html>
