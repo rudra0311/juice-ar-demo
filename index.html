@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Juice AR Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
+             embedded 
+             color-space="sRGB" 
+             renderer="colorManagement: true, physicallyCorrectLights"
+             vr-mode-ui="enabled: false" 
+             device-orientation-permission-ui="enabled: false">
+
+      <a-assets>
+        <video id="juiceVideo" src="./juice.mp4" autoplay loop muted playsinline></video>
+      </a-assets>
+
+      <!-- Camera -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Target + Video -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane src="#juiceVideo" position="0 0 0" height="1" width="1.5"></a-plane>
+      </a-entity>
+
+    </a-scene>
+  </body>
+</html>
