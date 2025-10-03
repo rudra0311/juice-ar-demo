@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Juice AR Demo (Animated JS)</title>
+  <title>Juice AR Demo (GLTF + Animations)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- A-Frame + MindAR -->
@@ -11,9 +11,9 @@
 </head>
 <body style="margin:0; font-family: sans-serif;">
 
-  <h2 style="text-align:center; margin:10px 0;">🍹 Juice AR Demo — Animated</h2>
+  <h2 style="text-align:center; margin:10px 0;">🍹 Juice AR Demo — Colorful GLTF</h2>
 
-  <!-- small UI to toggle spin (works on mobile) -->
+  <!-- Toggle Spin Button -->
   <button id="spinBtn" style="position:fixed; left:12px; bottom:18px; z-index:9999; padding:8px 12px;">
     Toggle Spin
   </button>
@@ -21,24 +21,24 @@
   <a-scene id="scene"
            mindar-image="imageTargetSrc: juice.mind;"
            color-space="sRGB"
-           renderer="colorManagement: true, physicallyCorrectLights"
+           renderer="colorManagement: true, physicallyCorrectLights, exposure:1.2, toneMapping:ACESFilmic"
            vr-mode-ui="enabled: false"
            device-orientation-permission-ui="enabled: false">
 
     <a-assets>
-      <!-- Put juice.glb in same folder -->
-      <a-asset-item id="juiceModel" src="juice.glb"></a-asset-item>
+      <!-- Load GLTF model (with textures in /textures folder) -->
+      <a-asset-item id="juiceModel" src="juice.gltf"></a-asset-item>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- simple lighting -->
-    <a-light type="ambient" intensity="0.9"></a-light>
-    <a-light type="directional" intensity="0.8" position="1 1 0.5"></a-light>
+    <!-- Better Lighting -->
+    <a-light type="hemisphere" intensity="1" color="#ffffff" ground-color="#444444"></a-light>
+    <a-light type="directional" intensity="1" position="2 4 5"></a-light>
+    <a-light type="point" intensity="0.6" position="-2 2 2" color="#ffdca8"></a-light>
 
-    <!-- container is anchored to the marker; invisible by default -->
+    <!-- Container bound to marker -->
     <a-entity id="juiceContainer" mindar-image-target="targetIndex: 0" visible="false">
-      <!-- model starts at scale 0 so we'll scale it in -->
       <a-gltf-model id="juiceObject"
                     src="#juiceModel"
                     scale="0 0 0"
@@ -51,35 +51,31 @@
   </a-scene>
 
   <script>
-    // Elements
     const scene = document.querySelector("#scene");
     const container = document.querySelector("#juiceContainer");
     const model = document.querySelector("#juiceObject");
     const spinBtn = document.querySelector("#spinBtn");
 
-    // Animation state and params (tweak these)
     let animRunning = false;
     let spinning = true;
-    let rotationY = 0;            // current Y rotation (degrees)
-    let baseY = 0;                // base Y position for floating
-    const floatAmp = 0.05;       // float amplitude (meters)
-    const floatFreq = 0.5;       // float frequency (Hz)
-    const spinPeriod = 8000;     // ms per full spin
-    const scaleTarget = 0.5;     // final scale (adjust to fit your model)
-    const scaleDuration = 600;   // ms for scale-in
+    let rotationY = 0;
+    let baseY = 0;
+    const floatAmp = 0.05;
+    const floatFreq = 0.5;
+    const spinPeriod = 8000;
+    const scaleTarget = 0.5;
+    const scaleDuration = 600;
     let scaling = false;
     let scaleStart = 0;
     let scaleStartTime = 0;
     let prevTime = null;
 
-    // Wait for GLB to load so we can read its position (pivot)
     model.addEventListener("model-loaded", () => {
       const pos = model.getAttribute("position");
       baseY = (pos && pos.y) ? pos.y : 0;
-      console.log("model-loaded, baseY =", baseY);
+      console.log("✅ model-loaded with textures, baseY =", baseY);
     });
 
-    // MindAR events
     scene.addEventListener("loaded", () => {
       const mindar = scene.components["mindar-image"];
       if (!mindar) {
@@ -92,13 +88,11 @@
         container.setAttribute("visible", "true");
         model.setAttribute("visible", "true");
 
-        // initialize scale animation
         const s = model.getAttribute("scale");
         scaleStart = (s && s.x) ? s.x : 0;
         scaling = true;
         scaleStartTime = performance.now();
 
-        // start loop if not already running
         if (!animRunning) {
           animRunning = true;
           prevTime = null;
@@ -107,11 +101,10 @@
       });
 
       mindar.el.addEventListener("targetLost", () => {
-        console.log("❌ Marker lost — stopping animations & resetting");
+        console.log("❌ Marker lost — hiding model");
         container.setAttribute("visible", "false");
         model.setAttribute("visible", "false");
 
-        // reset state
         scaling = false;
         animRunning = false;
         rotationY = 0;
@@ -121,14 +114,12 @@
       });
     });
 
-    // Main animation loop (requestAnimationFrame)
     function loop(now) {
-      if (!animRunning) return;      // stop loop when not running
+      if (!animRunning) return;
       if (!prevTime) prevTime = now;
-      const dt = now - prevTime;     // ms since last frame
+      const dt = now - prevTime;
       prevTime = now;
 
-      // scaling (smooth ease-out)
       if (scaling) {
         const elapsed = now - scaleStartTime;
         const t = Math.min(1, elapsed / scaleDuration);
@@ -138,37 +129,29 @@
         if (t >= 1) scaling = false;
       }
 
-      // spinning
       if (spinning) {
         rotationY = (rotationY + dt * 360 / spinPeriod) % 360;
         model.setAttribute("rotation", `0 ${rotationY} 0`);
       }
 
-      // floating (sinusoidal)
       const floatY = baseY + Math.sin(now / 1000 * Math.PI * 2 * floatFreq) * floatAmp;
       model.setAttribute("position", `0 ${floatY} 0`);
 
       requestAnimationFrame(loop);
     }
 
-    // Simple easing
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
-    // Toggle spin from UI button (works on mobile)
-    spinBtn.addEventListener("click", (e) => {
+    spinBtn.addEventListener("click", () => {
       spinning = !spinning;
       spinBtn.textContent = spinning ? "Toggle Spin" : "Start Spin";
-      console.log("Spin toggled:", spinning);
+      console.log("🔄 Spin toggled:", spinning);
     });
 
-    // Also allow clicking/tapping the model to toggle spin (if device sends event to model)
     model.addEventListener("click", () => {
       spinning = !spinning;
-      console.log("Spin toggled (model click):", spinning);
+      console.log("🔄 Spin toggled (model click):", spinning);
     });
-
-    // Helpful debug hints in console
-    console.log("Debug: ready — look for 'model-loaded', 'Marker found', and 'Marker lost' in console.");
   </script>
 </body>
 </html>
